@@ -17,18 +17,17 @@ var banner = ['/*!\n',
 ].join('');
 
 // Copy third party libraries from /node_modules into /vendor
-gulp.task('vendor', function(done) {
-
-  // Bootstrap
-  gulp.src([
+gulp.task('vendor:bootstrap', function() {
+  return gulp.src([
       './node_modules/bootstrap/dist/**/*',
       '!./node_modules/bootstrap/dist/css/bootstrap-grid*',
       '!./node_modules/bootstrap/dist/css/bootstrap-reboot*'
     ])
     .pipe(gulp.dest('./vendor/bootstrap'));
+});
 
-  // Font Awesome
-  gulp.src([
+gulp.task('vendor:font-awesome', function() {
+  return gulp.src([
       './node_modules/font-awesome/**/*',
       '!./node_modules/font-awesome/{less,less/*}',
       '!./node_modules/font-awesome/{scss,scss/*}',
@@ -36,21 +35,24 @@ gulp.task('vendor', function(done) {
       '!./node_modules/font-awesome/*.{txt,json,md}'
     ])
     .pipe(gulp.dest('./vendor/font-awesome'));
+});
 
-  // jQuery
-  gulp.src([
+gulp.task('vendor:jquery', function() {
+  return gulp.src([
       './node_modules/jquery/dist/*',
       '!./node_modules/jquery/dist/core.js'
     ])
     .pipe(gulp.dest('./vendor/jquery'));
+});
 
-  // jQuery Easing
-  gulp.src([
+gulp.task('vendor:jquery-easing', function() {
+  return gulp.src([
       './node_modules/jquery.easing/*.js'
     ])
     .pipe(gulp.dest('./vendor/jquery-easing'));
-  done();
 });
+
+gulp.task('vendor', gulp.parallel('vendor:bootstrap', 'vendor:font-awesome', 'vendor:jquery', 'vendor:jquery-easing'));
 
 // Compile SCSS
 gulp.task('css:compile', function() {
@@ -62,7 +64,7 @@ gulp.task('css:compile', function() {
 });
 
 // Minify CSS
-gulp.task('css:minify', gulp.series('css:compile', function() {
+gulp.task('css:minify', function() {
   return gulp.src([
       './css/*.css',
       '!./css/*.min.css'
@@ -73,7 +75,7 @@ gulp.task('css:minify', gulp.series('css:compile', function() {
     }))
     .pipe(gulp.dest('./css'))
     .pipe(browserSync.stream());
-}));
+});
 
 // CSS
 gulp.task('css', gulp.series('css:compile', 'css:minify'));
@@ -96,7 +98,7 @@ gulp.task('js:minify', function() {
 gulp.task('js', gulp.series('js:minify'));
 
 // Default task
-gulp.task('default', gulp.series('css', 'js', 'vendor'));
+gulp.task('default', gulp.series(gulp.parallel('css', 'js'), 'vendor'));
 
 // Configure the browserSync task
 gulp.task('browserSync', function(done) {
